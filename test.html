@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h3>Test Google Apps Script POST</h3>
+<button onclick="send()">Send Test Order</button>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyvV0Lg1FZz_Ae6vElDoKsprIKsTSpb509KuJkbCbl0fMV0NyB1_9hY4bHNW9O78-_StA/exec";
+
+function send() {
+  const testData = {
+    id: "T123",
+    customer: "John Doe",
+    date: "2025-11-05",
+    items: "Apples 10kg, Oranges 5kg",
+    total: 80
+  };
+
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(testData)
+  })
+  .then(r => r.text())
+  .then(txt => alert("Response: " + txt))
+  .catch(err => alert("Error: " + err));
+}
+</script>
+</body>
+</html>
