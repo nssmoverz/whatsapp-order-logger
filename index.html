@@ -28,12 +28,12 @@
     const msg = document.getElementById('message').value;
     if (!msg.trim()) return alert("Please paste a message first.");
 
-    // Parse WhatsApp message using updated regex
-    const id = msg.match(/Order ID[:\- ]+(.+)/i)?.[1]?.trim() || "N/A";
+    // Parse WhatsApp message
+    const id = msg.match(/Order ID[:\- ]+(\d+)/i)?.[1] || "N/A";
     const customer = msg.match(/Customer[:\- ]+(.+)/i)?.[1]?.trim() || "N/A";
-    const date = msg.match(/Date[:\- ]+(.+)/i)?.[1]?.trim() || new Date().toISOString().split('T')[0];
+    const date = msg.match(/Date[:\- ]+([\d\/\- ]+)/i)?.[1]?.trim() || new Date().toISOString().split('T')[0];
     const items = msg.match(/Items[:\- ]+(.+)/i)?.[1]?.trim() || "N/A";
-    const total = msg.match(/Total[:\- ]+\$?(.+)/i)?.[1]?.trim() || 0;
+    const total = msg.match(/Total[:\- ]+\$?(\d+)/i)?.[1] || 0;
 
     // Display extracted info
     document.getElementById('output').innerHTML =
@@ -54,7 +54,7 @@
     });
     const url = SCRIPT_URL + "?" + params.toString();
 
-    // Send GET request to Apps Script
+    // Send GET request
     fetch(url)
       .then(r => r.text())
       .then(txt => alert("Order saved!"))
@@ -64,4 +64,3 @@
 
 </body>
 </html>
-
