@@ -14,48 +14,53 @@
 </head>
 <body>
 
-  <h2>Paste WhatsApp Order Message</h2>
-  <textarea id="message" placeholder="Paste your order message here..."></textarea>
-  <button onclick="extractOrder()">Extract & Save</button>
+<h2>Paste WhatsApp Order Message</h2>
+<textarea id="message" placeholder="Paste your order message here..."></textarea>
+<button onclick="extractOrder()">Extract & Save</button>
 
-  <div id="output"></div>
+<div id="output"></div>
 
-  <script>
-    // Replace with your Google Apps Script Web App URL
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyvV0Lg1FZz_Ae6vElDoKsprIKsTSpb509KuJkbCbl0fMV0NyB1_9hY4bHNW9O78-_StA/exec";
+<script>
+  // Replace with your Google Apps Script Web App URL
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyvV0Lg1FZz_Ae6vElDoKsprIKsTSpb509KuJkbCbl0fMV0NyB1_9hY4bHNW9O78-_StA/exec";
 
-    function extractOrder() {
-      const msg = document.getElementById('message').value;
-      if (!msg.trim()) return alert("Please paste a message first.");
+  function extractOrder() {
+    const msg = document.getElementById('message').value;
+    if (!msg.trim()) return alert("Please paste a message first.");
 
-      // Parse WhatsApp message
-      const id = msg.match(/Order ID[:\- ]+(\d+)/i)?.[1] || "N/A";
-      const customer = msg.match(/Customer[:\- ]+(.+)/i)?.[1]?.trim() || "N/A";
-      const date = msg.match(/Date[:\- ]+([\d\/\- ]+)/i)?.[1]?.trim() || new Date().toISOString().split('T')[0];
-      const items = msg.match(/Items[:\- ]+(.+)/i)?.[1]?.trim() || "N/A";
-      const total = msg.match(/Total[:\- ]+\$?(\d+)/i)?.[1] || 0;
+    // Parse WhatsApp message
+    const id = msg.match(/Order ID[:\- ]+(\d+)/i)?.[1] || "N/A";
+    const customer = msg.match(/Customer[:\- ]+(.+)/i)?.[1]?.trim() || "N/A";
+    const date = msg.match(/Date[:\- ]+([\d\/\- ]+)/i)?.[1]?.trim() || new Date().toISOString().split('T')[0];
+    const items = msg.match(/Items[:\- ]+(.+)/i)?.[1]?.trim() || "N/A";
+    const total = msg.match(/Total[:\- ]+\$?(\d+)/i)?.[1] || 0;
 
-      // Display result on page
-      document.getElementById('output').innerHTML =
-        `<b>Extracted:</b><br>
-        ID: ${id}<br>
-        Customer: ${customer}<br>
-        Date: ${date}<br>
-        Items: ${items}<br>
-        Total: $${total}<br>`;
+    // Display extracted info
+    document.getElementById('output').innerHTML =
+      `<b>Extracted:</b><br>
+      ID: ${id}<br>
+      Customer: ${customer}<br>
+      Date: ${date}<br>
+      Items: ${items}<br>
+      Total: $${total}<br>`;
 
-      // Build URL with GET parameters
-      const params = new URLSearchParams({ id, customer, date, items, total });
-      const url = SCRIPT_URL + "?" + params.toString();
+    // Build GET URL with URL-encoded parameters
+    const params = new URLSearchParams({
+      id: encodeURIComponent(id),
+      customer: encodeURIComponent(customer),
+      date: encodeURIComponent(date),
+      items: encodeURIComponent(items),
+      total: encodeURIComponent(total)
+    });
+    const url = SCRIPT_URL + "?" + params.toString();
 
-      // Send GET request
-      fetch(url)
-        .then(r => r.text())
-        .then(txt => alert("Order saved!"))
-        .catch(err => alert("Error: " + err));
-    }
-  </script>
+    // Send GET request
+    fetch(url)
+      .then(r => r.text())
+      .then(txt => alert("Order saved!"))
+      .catch(err => alert("Error: " + err));
+  }
+</script>
 
 </body>
 </html>
-
