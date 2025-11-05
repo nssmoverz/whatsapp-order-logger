@@ -22,18 +22,18 @@
 
 <script>
   // Replace with your Google Apps Script Web App URL
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyvV0Lg1FZz_Ae6vElDoKsprIKsTSpb509KuJkbCbl0fMV0NyB1_9hY4bHNW9O78-_StA/exec";
+  const SCRIPT_URL = "YOUR_GOOGLE_SCRIPT_URL_HERE";
 
   function extractOrder() {
     const msg = document.getElementById('message').value;
     if (!msg.trim()) return alert("Please paste a message first.");
 
-    // Parse WhatsApp message
-    const id = msg.match(/Order ID[:\- ]+(\d+)/i)?.[1] || "N/A";
+    // Parse WhatsApp message using updated regex
+    const id = msg.match(/Order ID[:\- ]+(.+)/i)?.[1]?.trim() || "N/A";
     const customer = msg.match(/Customer[:\- ]+(.+)/i)?.[1]?.trim() || "N/A";
-    const date = msg.match(/Date[:\- ]+([\d\/\- ]+)/i)?.[1]?.trim() || new Date().toISOString().split('T')[0];
+    const date = msg.match(/Date[:\- ]+(.+)/i)?.[1]?.trim() || new Date().toISOString().split('T')[0];
     const items = msg.match(/Items[:\- ]+(.+)/i)?.[1]?.trim() || "N/A";
-    const total = msg.match(/Total[:\- ]+\$?(\d+)/i)?.[1] || 0;
+    const total = msg.match(/Total[:\- ]+\$?(.+)/i)?.[1]?.trim() || 0;
 
     // Display extracted info
     document.getElementById('output').innerHTML =
@@ -54,7 +54,7 @@
     });
     const url = SCRIPT_URL + "?" + params.toString();
 
-    // Send GET request
+    // Send GET request to Apps Script
     fetch(url)
       .then(r => r.text())
       .then(txt => alert("Order saved!"))
