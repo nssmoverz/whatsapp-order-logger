@@ -1,153 +1,121 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>View Orders</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f9fafb;
-      margin: 0;
-      padding: 20px;
+    :root{
+      --bg:#f9fafb;
+      --card:#fff;
+      --accent:#4CAF50;
+      --accent2:#2196F3;
+      --muted:#666;
+      --radius:10px;
     }
-    h2 {
-      text-align: center;
-      color: #333;
+    html,body{height:100%; margin:0; font-family:Arial,Helvetica,sans-serif; background:var(--bg); color:#222;}
+    .wrap{max-width:1100px; margin:28px auto; padding:18px; box-sizing:border-box;}
+    .card{background:var(--card); border-radius:var(--radius); padding:18px; box-shadow:0 6px 18px rgba(0,0,0,0.06);}
+    header{display:flex;flex-direction:column; gap:12px; align-items:center;}
+    h1{margin:0; font-size:22px;}
+    /* button row */
+    .controls{display:flex; gap:12px; align-items:center; justify-content:center; flex-wrap:wrap; margin-bottom:6px;}
+    .btn {
+      display:inline-flex; align-items:center; gap:8px;
+      padding:10px 14px; border-radius:8px; border:0; color:#fff; cursor:pointer; font-weight:600;
+      box-shadow:0 2px 6px rgba(0,0,0,0.06);
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-      background: white;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    }
-    th, td {
-      text-align: left;
-      padding: 12px 8px;
-      border-bottom: 1px solid #ddd;
-    }
-    th {
-      background-color: #4CAF50;
-      color: white;
-    }
-    tr:hover {
-      background-color: #f1f1f1;
-    }
-    #refreshBtn {
-      background: #4CAF50;
-      color: white;
-      border: none;
-      padding: 10px 15px;
-      font-size: 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      margin: 0 auto;
-      display: block;
-    }
-    #refreshBtn:hover {
-      background: #45a049;
-    }
-    #status {
-      text-align: center;
-      margin-top: 10px;
-      font-weight: bold;
+    .btn-green{ background:var(--accent); }
+    .btn-blue{ background:var(--accent2); }
+    .status{ text-align:center; color:var(--muted); margin-bottom:12px; font-weight:600; }
+
+    /* table */
+    .table-wrap{overflow:auto; margin-top:8px;}
+    table{width:100%; border-collapse:collapse; min-width:800px;}
+    th,td{padding:12px 10px; border-bottom:1px solid #eee; text-align:left;}
+    th{background:linear-gradient(180deg,#4CAF50,#3da144); color:#fff; font-weight:700; position:sticky; top:0;}
+    tr:hover td{background:#fbfffb;}
+    @media (max-width:760px){
+      th,td{padding:10px 6px; font-size:13px;}
+      table{min-width:600px;}
     }
   </style>
 </head>
 <body>
-  <h2 style="text-align:center;">All Orders</h2>
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <h1>All Orders</h1>
 
-<div style="text-align:center; margin-bottom:20px;">
-  <a href="index.html" style="
-    display:inline-block;
-    padding:8px 14px;
-    background:#4CAF50;
-    color:white;
-    border-radius:6px;
-    text-decoration:none;
-    font-weight:bold;
-    margin-right:10px;
-  ">➕ Add Order</a>
+        <!-- Controls: Add + Refresh aligned via flexbox -->
+        <div class="controls">
+          <a href="index.html" class="btn btn-green" style="text-decoration:none; color:white;">➕ Add Order</a>
+          <button id="refreshBtn" class="btn btn-blue" onclick="fetchOrders()">🔄 Refresh Orders</button>
+        </div>
 
-  <button id="refreshBtn" onclick="fetchOrders()" style="
-    display:inline-block;
-    padding:9px 14px;
-    background:#2196F3;
-    color:white;
-    border:none;
-    border-radius:6px;
-    font-size:16px;
-    cursor:pointer;
-  ">🔄 Refresh Orders</button>
-</div>
+        <div id="status" class="status">Loading...</div>
+      </header>
 
-<div id="status" style="text-align:center; margin-bottom:10px; font-weight:bold;">
-  Loading...
-</div>
-  <a href="index.html" style="float:right; margin-bottom:10px; text-decoration:none; color:#4CAF50; font-weight:bold;">➕ Add Order</a>
-  <button id="refreshBtn" onclick="fetchOrders()">🔄 Refresh Orders</button>
-  <div id="status">Loading...</div>
-
-  <table id="ordersTable">
-    <thead>
-      <tr>
-        <th>Timestamp</th>
-        <th>Order ID</th>
-        <th>Customer</th>
-        <th>Date</th>
-        <th>Items</th>
-        <th>Total</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+      <div class="table-wrap">
+        <table id="ordersTable" aria-live="polite">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Date</th>
+              <th>Items</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxUf4izbMFu9ulS19MpfQ_Q7p9-gmgMwLkEJ9UH_jSvTwEpXLBbopxh-rthiZFgwVGm/exec"; // replace with your /exec link
 
     async function fetchOrders() {
-      const status = document.getElementById('status');
+      const statusEl = document.getElementById('status');
       const tbody = document.querySelector('#ordersTable tbody');
-      tbody.innerHTML = "";
-      status.textContent = "Fetching latest data...";
+      tbody.innerHTML = '';
+      statusEl.textContent = 'Fetching latest data...';
 
       try {
         const res = await fetch(SCRIPT_URL);
+        if (!res.ok) throw new Error('Network response was not ok');
         const data = await res.json();
 
-        if (!data.length) {
-          status.textContent = "No orders found yet.";
+        if (!Array.isArray(data) || data.length === 0) {
+          statusEl.textContent = 'No orders found yet.';
           return;
         }
 
+        // show newest first
         data.reverse().forEach(order => {
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${order.Timestamp}</td>
-            <td>${order["Order ID"]}</td>
-            <td>${order.Customer}</td>
-            <td>${order.Date}</td>
-            <td>${order.Items}</td>
-            <td>${order.Total}</td>
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${order.Timestamp ?? ''}</td>
+            <td>${order["Order ID"] ?? ''}</td>
+            <td>${order.Customer ?? ''}</td>
+            <td>${order.Date ?? ''}</td>
+            <td>${order.Items ?? ''}</td>
+            <td>${order.Total ?? ''}</td>
           `;
-          tbody.appendChild(row);
+          tbody.appendChild(tr);
         });
 
-        status.textContent = "✅ Data loaded successfully!";
+        statusEl.textContent = '✅ Data loaded successfully!';
       } catch (err) {
         console.error(err);
-        status.textContent = "❌ Failed to fetch orders.";
+        statusEl.textContent = '❌ Failed to fetch orders: ' + (err.message || '');
       }
     }
 
-    // Load orders when the page opens
+    // initial load
     fetchOrders();
   </script>
 </body>
-
 </html>
-
-
