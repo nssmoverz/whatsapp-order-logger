@@ -2,64 +2,29 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>WhatsApp Order Extractor</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 40px; background: #fafafa; }
-    h2 { color: #333; }
-    textarea { width: 100%; height: 120px; margin-bottom: 10px; padding: 10px; font-size: 14px; }
-    button { padding: 10px 20px; font-size: 16px; cursor: pointer; background: #28a745; color: white; border: none; border-radius: 5px; }
-    button:hover { background: #218838; }
-    #output { background: #fff; padding: 15px; border-radius: 8px; margin-top: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-  </style>
+  <title>Simple Order Test</title>
 </head>
 <body>
 
-<h2>Paste WhatsApp Order Message</h2>
-<textarea id="message" placeholder="Paste your order message here..."></textarea>
-<button onclick="extractOrder()">Extract & Save</button>
-
-<div id="output"></div>
+<h2>Test Order ID</h2>
+<input type="text" id="orderId" placeholder="Enter Order ID">
+<button onclick="sendOrder()">Save Order</button>
 
 <script>
-  // Replace with your Google Apps Script Web App URL
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyvV0Lg1FZz_Ae6vElDoKsprIKsTSpb509KuJkbCbl0fMV0NyB1_9hY4bHNW9O78-_StA/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyvV0Lg1FZz_Ae6vElDoKsprIKsTSpb509KuJkbCbl0fMV0NyB1_9hY4bHNW9O78-_StA/exec"; // Replace with your /exec URL
 
-  function extractOrder() {
-    const msg = document.getElementById('message').value;
-    if (!msg.trim()) return alert("Please paste a message first.");
+function sendOrder() {
+  const orderId = document.getElementById('orderId').value.trim();
+  if (!orderId) return alert("Enter an Order ID first");
 
-    // Parse WhatsApp message
-    const id = msg.match(/Order ID[:\- ]+(\d+)/i)?.[1] || "N/A";
-    const customer = msg.match(/Customer[:\- ]+(.+)/i)?.[1]?.trim() || "N/A";
-    const date = msg.match(/Date[:\- ]+([\d\/\- ]+)/i)?.[1]?.trim() || new Date().toISOString().split('T')[0];
-    const items = msg.match(/Items[:\- ]+(.+)/i)?.[1]?.trim() || "N/A";
-    const total = msg.match(/Total[:\- ]+\$?(\d+)/i)?.[1] || 0;
+  const params = new URLSearchParams({ orderId: encodeURIComponent(orderId) });
+  const url = SCRIPT_URL + "?" + params.toString();
 
-    // Display extracted info
-    document.getElementById('output').innerHTML =
-      `<b>Extracted:</b><br>
-      ID: ${id}<br>
-      Customer: ${customer}<br>
-      Date: ${date}<br>
-      Items: ${items}<br>
-      Total: $${total}<br>`;
-
-    // Build GET URL with URL-encoded parameters
-    const params = new URLSearchParams({
-      id: encodeURIComponent(id),
-      customer: encodeURIComponent(customer),
-      date: encodeURIComponent(date),
-      items: encodeURIComponent(items),
-      total: encodeURIComponent(total)
-    });
-    const url = SCRIPT_URL + "?" + params.toString();
-
-    // Send GET request
-    fetch(url)
-      .then(r => r.text())
-      .then(txt => alert("Order saved!"))
-      .catch(err => alert("Error: " + err));
-  }
+  fetch(url)
+    .then(r => r.text())
+    .then(txt => alert(txt))
+    .catch(err => alert("Error: " + err));
+}
 </script>
 
 </body>
