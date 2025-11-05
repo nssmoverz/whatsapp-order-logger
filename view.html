@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>View Orders</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f9fafb;
+      margin: 0;
+      padding: 20px;
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    th, td {
+      text-align: left;
+      padding: 12px 8px;
+      border-bottom: 1px solid #ddd;
+    }
+    th {
+      background-color: #4CAF50;
+      color: white;
+    }
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+    #refreshBtn {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin: 0 auto;
+      display: block;
+    }
+    #refreshBtn:hover {
+      background: #45a049;
+    }
+    #status {
+      text-align: center;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h2>All Orders</h2>
+
+  <button id="refreshBtn" onclick="fetchOrders()">🔄 Refresh Orders</button>
+  <div id="status">Loading...</div>
+
+  <table id="ordersTable">
+    <thead>
+      <tr>
+        <th>Timestamp</th>
+        <th>Order ID</th>
+        <th>Customer</th>
+        <th>Date</th>
+        <th>Items</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxUf4izbMFu9ulS19MpfQ_Q7p9-gmgMwLkEJ9UH_jSvTwEpXLBbopxh-rthiZFgwVGm/exec"; // replace with your /exec link
+
+    async function fetchOrders() {
+      const status = document.getElementById('status');
+      const tbody = document.querySelector('#ordersTable tbody');
+      tbody.innerHTML = "";
+      status.textContent = "Fetching latest data...";
+
+      try {
+        const res = await fetch(SCRIPT_URL);
+        const data = await res.json();
+
+        if (!data.length) {
+          status.textContent = "No orders found yet.";
+          return;
+        }
+
+        data.reverse().forEach(order => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${order.Timestamp}</td>
+            <td>${order["Order ID"]}</td>
+            <td>${order.Customer}</td>
+            <td>${order.Date}</td>
+            <td>${order.Items}</td>
+            <td>${order.Total}</td>
+          `;
+          tbody.appendChild(row);
+        });
+
+        status.textContent = "✅ Data loaded successfully!";
+      } catch (err) {
+        console.error(err);
+        status.textContent = "❌ Failed to fetch orders.";
+      }
+    }
+
+    // Load orders when the page opens
+    fetchOrders();
+  </script>
+</body>
+</html>
