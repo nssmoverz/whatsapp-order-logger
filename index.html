@@ -1,33 +1,122 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Simple Order Test</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Order Extractor</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f9fafb;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h2 { text-align: center; color: #333; }
+    textarea {
+      width: 100%;
+      height: 150px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 12px;
+      resize: vertical;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+      border: none;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .success {
+      color: green;
+      font-weight: bold;
+      text-align: center;
+    }
+    .error {
+      color: red;
+      font-weight: bold;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
+  <h2>WhatsApp Order Extractor</h2>
 
-<h2>Test Order ID</h2>
-<input type="text" id="orderId" placeholder="Enter Order ID">
-<button onclick="sendOrder()">Save Order</button>
+  <textarea id="messageInput" placeholder="Paste WhatsApp message here..."></textarea>
+  <button onclick="extractOrder()">Extract Order</button>
 
-<script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxUf4izbMFu9ulS19MpfQ_Q7p9-gmgMwLkEJ9UH_jSvTwEpXLBbopxh-rthiZFgwVGm/exec"; // Replace with your /exec URL
+  <input type="text" id="orderId" placeholder="Order ID">
+  <input type="text" id="customer" placeholder="Customer Name">
+  <input type="text" id="date" placeholder="Date">
+  <input type="text" id="items" placeholder="Items">
+  <input type="text" id="total" placeholder="Total Amount">
 
-function sendOrder() {
-  const orderId = document.getElementById('orderId').value.trim();
-  if (!orderId) return alert("Enter an Order ID first");
+  <button onclick="submitOrder()">Save Order</button>
 
-  const params = new URLSearchParams({ orderId: encodeURIComponent(orderId) });
-  const url = SCRIPT_URL + "?" + params.toString();
+  <div id="responseMessage"></div>
 
-  fetch(url)
-    .then(r => r.text())
-    .then(txt => alert(txt))
-    .catch(err => alert("Error: " + err));
-}
-</script>
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxUf4izbMFu9ulS19MpfQ_Q7p9-gmgMwLkEJ9UH_jSvTwEpXLBbopxh-rthiZFgwVGm/exec"; // replace with your /exec link
 
+    function extractOrder() {
+      const msg = document.getElementById('messageInput').value;
+      // basic regex extraction logic
+      const orderId = msg.match(/Order\s*ID[:\-]?\s*(\S+)/i)?.[1] || "";
+      const customer = msg.match(/Customer[:\-]?\s*(.+)/i)?.[1]?.split("\n")[0] || "";
+      const date = msg.match(/Date[:\-]?\s*(\d{1,2}\s+\w+\s+\d{4})/i)?.[1] || "";
+      const total = msg.match(/Total[:\-]?\s*\$?([\d.,]+)/i)?.[1] || "";
+      const items = msg.match(/Items[:\-]?\s*([\s\S]+)/i)?.[1]?.split("Total")[0].trim() || "";
+
+      document.getElementById('orderId').value = orderId;
+      document.getElementById('customer').value = customer;
+      document.getElementById('date').value = date;
+      document.getElementById('items').value = items;
+      document.getElementById('total').value = total;
+    }
+
+    async function submitOrder() {
+      const data = {
+        orderId: document.getElementById('orderId').value,
+        customer: document.getElementById('customer').value,
+        date: document.getElementById('date').value,
+        items: document.getElementById('items').value,
+        total: document.getElementById('total').value
+      };
+
+      const responseMessage = document.getElementById('responseMessage');
+      responseMessage.textContent = "Saving order...";
+      responseMessage.className = "";
+
+      try {
+        const params = new URLSearchParams(data);
+        const res = await fetch(`${SCRIPT_URL}?${params}`, { method: 'GET' });
+        const text = await res.text();
+        if (text.includes("Success")) {
+          responseMessage.textContent = "✅ Order saved successfully!";
+          responseMessage.className = "success";
+        } else {
+          responseMessage.textContent = "❌ Failed to save order.";
+          responseMessage.className = "error";
+        }
+      } catch (err) {
+        responseMessage.textContent = "⚠️ Error: " + err.message;
+        responseMessage.className = "error";
+      }
+    }
+  </script>
 </body>
 </html>
-
-
