@@ -94,13 +94,6 @@
     finishedUnloading: /Habis\s*turun\s*[:\-]?\s*([\d:.apm\s]+)/i
   };
 
-  // Extract values
-  const data = {};
-  for (const [key, regex] of Object.entries(patterns)) {
-    const match = msg.match(regex);
-    data[key] = match ? match[1].trim() : "";
-  }
-
   // Update your input fields
   document.getElementById("orderId").value = data.orderNo;
   document.getElementById("lorryNo").value = data.lorryNo;
@@ -150,3 +143,4 @@
   </script>
 </body>
 </html>
+
