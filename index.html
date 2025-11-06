@@ -59,16 +59,11 @@
   <textarea id="messageInput" placeholder="Paste WhatsApp message here..."></textarea>
   <button onclick="extractOrder()">Extract Order</button>
 
-  <input type="text" id="loadingDate" placeholder="Loading Goods Date">
-  <input type="text" id="deliveryDate" placeholder="Delivery Date">
-  <input type="text" id="lorryNo" placeholder="Lorry No.">
-  <input type="text" id="orderNo" placeholder="Order No.">
-  <input type="text" id="containerNo" placeholder="Container No.">
-  <input type="text" id="arrivedPort" placeholder="Arrived at port">
-  <input type="text" id="loadedGoods" placeholder="Loaded Goods">
-  <input type="text" id="exitPort" placeholder="Exit port">
-  <input type="text" id="arrivedDelivery" placeholder="Arrived at delivery location">
-  <input type="text" id="finishedUnloading" placeholder="Finished Unloading">
+  <input type="text" id="orderId" placeholder="Order ID">
+  <input type="text" id="customer" placeholder="Customer Name">
+  <input type="text" id="date" placeholder="Date">
+  <input type="text" id="items" placeholder="Items">
+  <input type="text" id="total" placeholder="Total Amount">
 
   <button onclick="submitOrder()">Save Order</button>
 
@@ -80,60 +75,26 @@
     function extractOrder() {
       const msg = document.getElementById('messageInput').value;
       // basic regex extraction logic
-      const loadingDate = msg.match(/Date[:\-]?\s*(\d{1,2}\s+\w+\s+\d{4})/i)?.[1] || "";
-      const deliveryDate = msg.match(/Date[:\-]?\s*(\d{1,2}\s+\w+\s+\d{4})/i)?.[1] || "";
-      const lorryNo = msg.match(/Lorry\s*no[:\-]?\s*(\S+)/i)?.[1] || "";
-      const orderNo = msg.match(/Order\s*no[:\-]?\s*(\S+)/i)?.[1] || "";
-      const containerNo = msg.match(/Cont\s*no[:\-]?\s*(\S+)/i)?.[1] || "";
-      const arrivedPort = msg.match(/Sampai\s*port[:\-]?\s*(\S+)/i)?.[1] || "";
-      const loadedGoods = msg.match(/Naik\s*barang[:\-]?\s*(\S+)/i)?.[1] || "";
-      const exitPort = msg.match(/Keluar\s*port[:\-]?\s*(\S+)/i)?.[1] || "";
-      const arrivedDelivery = msg.match(/Samapi\s*konsani[:\-]?\s*(\S+)/i)?.[1] || "";
-      const finishedUnloading = msg.match(/Habis\s*turun[:\-]?\s*(\S+)/i)?.[1] || "";
+      const orderId = msg.match(/Order\s*ID[:\-]?\s*(\S+)/i)?.[1] || "";
+      const customer = msg.match(/Customer[:\-]?\s*(.+)/i)?.[1]?.split("\n")[0] || "";
+      const date = msg.match(/Date[:\-]?\s*(\d{1,2}\s+\w+\s+\d{4})/i)?.[1] || "";
+      const total = msg.match(/Total[:\-]?\s*\$?([\d.,]+)/i)?.[1] || "";
+      const items = msg.match(/Items[:\-]?\s*([\s\S]+)/i)?.[1]?.split("Total")[0].trim() || "";
 
-      document.getElementById('loadingDate').value = loadingDate;
-      document.getElementById('deliveryDate').value = deliveryDate;
-      document.getElementById('lorryNo').value = lorryNo;
-      document.getElementById('orderNo').value = orderNo;
-      document.getElementById('containerNo').value = containerNo;
-      document.getElementById('arrivedPort').value = arrivedPort;
-      document.getElementById('loadedGoods').value = loadedGoods;
-      document.getElementById('exitPort').value = exitPort;
-      document.getElementById('arrivedDelivery').value = arrivedDelivery;
-      document.getElementById('finishedUnloading').value = finishedUnloading;
+      document.getElementById('orderId').value = orderId;
+      document.getElementById('customer').value = customer;
+      document.getElementById('date').value = date;
+      document.getElementById('items').value = items;
+      document.getElementById('total').value = total;
     }
 
-  // Extract values
-  const data = {};
-  for (const [key, regex] of Object.entries(patterns)) {
-    const match = msg.match(regex);
-    data[key] = match ? match[1].trim() : "";
-  }
-
-  // Update your input fields
-  document.getElementById("loadingDate").value = data.loadingDate;
-  document.getElementById("deliveryDate").value = data.deliveryDate;
-  document.getElementById("lorryNo").value = data.lorryNo;
-  document.getElementById("orderNo").value = data.orderNo;
-  document.getElementById("containerNo").value = data.containerNo;
-  document.getElementById("arrivedPort").value = data.arrivedPort;
-  document.getElementById("loadedGoods").value = data.loadedGoods;
-  document.getElementById("exitPort").value = data.exitPort;
-  document.getElementById("arrivedDelivery").value = data.arrivedDelivery;
-  document.getElementById("finishedUnloading").value = data.finishedUnloading;
-}
     async function submitOrder() {
       const data = {
-        loadingDate: document.getElementById("loadingDate").value,
-        deliveryDate: document.getElementById("deliveryDate").value,
-        lorryNo: document.getElementById("lorryNo").value,
-        orderNo: document.getElementById("orderNo").value,
-        containerNo: document.getElementById("containerNo").value,
-        arrivedPort: document.getElementById("arrivedPort").value,
-        loadedGoods: document.getElementById("loadedGoods").value,
-        exitPort: document.getElementById("exitPort").value,
-        arrivedDelivery: document.getElementById("arrivedDelivery").value,
-        finishedUnloading: document.getElementById("finishedUnloading").value
+        orderId: document.getElementById('orderId').value,
+        customer: document.getElementById('customer').value,
+        date: document.getElementById('date').value,
+        items: document.getElementById('items').value,
+        total: document.getElementById('total').value
       };
 
       const responseMessage = document.getElementById('responseMessage');
@@ -159,6 +120,9 @@
   </script>
 </body>
 </html>
+
+
+
 
 
 
