@@ -2,137 +2,73 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Finance Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Finance Overview</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background: #4CAF50;
-      color: white;
-      text-align: center;
-      padding: 15px;
-      font-size: 24px;
-    }
-    .container {
       max-width: 600px;
+      margin: auto;
+      padding: 20px;
+      background: #f5f7fa;
+    }
+    h1 { text-align: center; color: #333; margin-bottom: 20px; }
+    .finance-box {
       background: white;
-      margin: 30px auto;
-      padding: 25px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
-    label {
-      display: block;
-      margin-top: 10px;
-      font-weight: bold;
-    }
-    input {
-      width: 100%;
-      padding: 8px;
-      margin-top: 5px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    button {
-      background: #4CAF50;
-      color: white;
-      border: none;
-      padding: 10px 15px;
-      border-radius: 6px;
-      margin-top: 15px;
-      cursor: pointer;
-      width: 100%;
-      font-size: 16px;
-    }
-    button:hover {
-      background: #45a049;
+    .finance-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
     }
     .logout-btn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
       background: #f44336;
-    }
-    .readonly {
-      background: #eee;
+      color: white;
+      padding: 8px 14px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      float: right;
+      margin-bottom: 20px;
     }
   </style>
 </head>
 <body>
+  <button class="logout-btn" onclick="logout()">Logout</button>
+  <h1>Finance Overview</h1>
+  <div class="finance-box">
+    <div class="finance-item"><strong>Revenue:</strong> $<span id="revenue">0</span></div>
+    <div class="finance-item"><strong>Maintenance:</strong> $<span id="maintenance">0</span></div>
+    <div class="finance-item"><strong>Toll:</strong> $<span id="toll">0</span></div>
+    <div class="finance-item"><strong>Fuel:</strong> $<span id="fuel">0</span></div>
+    <div class="finance-item"><strong>Profit:</strong> $<span id="profit">0</span></div>
+  </div>
 
-<header>Finance Dashboard</header>
+  <script>
+    const role = localStorage.getItem("role");
+    if (!role) window.location.href = "login.html";
 
-<button class="logout-btn" onclick="logout()">Logout</button>
+    function loadFinance() {
+      const saved = localStorage.getItem("financeData");
+      if (saved) {
+        const data = JSON.parse(saved);
+        document.getElementById("revenue").textContent = data.revenue.toFixed(2);
+        document.getElementById("maintenance").textContent = data.maintenance.toFixed(2);
+        document.getElementById("toll").textContent = data.toll.toFixed(2);
+        document.getElementById("fuel").textContent = data.fuel.toFixed(2);
+        document.getElementById("profit").textContent = data.profit.toFixed(2);
+      }
+    }
 
-<div class="container">
-  <h2 style="text-align:center;">Finance Summary</h2>
+    function logout() {
+      localStorage.removeItem("role");
+      window.location.href = "login.html";
+    }
 
-  <label for="revenue">Revenue (SGD)</label>
-  <input type="number" id="revenue" placeholder="Enter total revenue">
-
-  <label for="maintenance">Maintenance Cost (SGD)</label>
-  <input type="number" id="maintenance" placeholder="Enter maintenance cost">
-
-  <label for="toll">Toll Charges (SGD)</label>
-  <input type="number" id="toll" placeholder="Enter toll charges">
-
-  <label for="fuel">Fuel Costs (SGD)</label>
-  <input type="number" id="fuel" placeholder="Enter fuel costs">
-
-  <label for="profit">Profit (SGD)</label>
-  <input type="number" id="profit" class="readonly" readonly>
-
-  <button onclick="calculateProfit()">💰 Calculate Profit</button>
-</div>
-
-<script>
-// ✅ Login check (only admin can access)
-const role = localStorage.getItem("role");
-if (!role) {
-  window.location.href = "login.html";
-}
-if (role !== "admin") {
-  alert("Access denied. Admins only.");
-  window.location.href = "view.html";
-}
-
-// ✅ Logout
-function logout() {
-  localStorage.removeItem("role");
-  window.location.href = "login.html";
-}
-
-// ✅ Calculate Profit
-function calculateProfit() {
-  const revenue = parseFloat(document.getElementById("revenue").value) || 0;
-  const maintenance = parseFloat(document.getElementById("maintenance").value) || 0;
-  const toll = parseFloat(document.getElementById("toll").value) || 0;
-  const fuel = parseFloat(document.getElementById("fuel").value) || 0;
-
-  const profit = revenue - (maintenance + toll + fuel);
-  document.getElementById("profit").value = profit.toFixed(2);
-
-  // Save data locally so admin doesn’t lose values after refresh
-  localStorage.setItem("financeData", JSON.stringify({ revenue, maintenance, toll, fuel, profit }));
-}
-
-// ✅ Load saved finance data
-window.onload = function() {
-  const saved = localStorage.getItem("financeData");
-  if (saved) {
-    const data = JSON.parse(saved);
-    document.getElementById("revenue").value = data.revenue;
-    document.getElementById("maintenance").value = data.maintenance;
-    document.getElementById("toll").value = data.toll;
-    document.getElementById("fuel").value = data.fuel;
-    document.getElementById("profit").value = data.profit;
-  }
-};
-</script>
-
+    loadFinance();
+  </script>
 </body>
 </html>
