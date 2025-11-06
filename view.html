@@ -1,122 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>View Orders</title>
   <style>
-    :root{
-      --bg:#f9fafb;
-      --card:#fff;
-      --accent:#4CAF50;
-      --accent2:#2196F3;
-      --muted:#666;
-      --radius:10px;
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 900px;
+      margin: auto;
+      background: #f5f7fa;
     }
-    html,body{height:100%; margin:0; font-family:Arial,Helvetica,sans-serif; background:var(--bg); color:#222;}
-    .wrap{max-width:1100px; margin:28px auto; padding:18px; box-sizing:border-box;}
-    .card{background:var(--card); border-radius:var(--radius); padding:18px; box-shadow:0 6px 18px rgba(0,0,0,0.06);}
-    header{display:flex;flex-direction:column; gap:12px; align-items:center;}
-    h1{margin:0; font-size:22px;}
-    /* button row */
-    .controls{display:flex; gap:12px; align-items:center; justify-content:center; flex-wrap:wrap; margin-bottom:6px;}
-    .btn {
-      display:inline-flex; align-items:center; gap:8px;
-      padding:10px 14px; border-radius:8px; border:0; color:#fff; cursor:pointer; font-weight:600;
-      box-shadow:0 2px 6px rgba(0,0,0,0.06);
-    }
-    .btn-green{ background:var(--accent); }
-    .btn-blue{ background:var(--accent2); }
-    .status{ text-align:center; color:var(--muted); margin-bottom:12px; font-weight:600; }
-
-    /* table */
-    .table-wrap{overflow:auto; margin-top:8px;}
-    table{width:100%; border-collapse:collapse; min-width:800px;}
-    th,td{padding:12px 10px; border-bottom:1px solid #eee; text-align:left;}
-    th{background:linear-gradient(180deg,#4CAF50,#3da144); color:#fff; font-weight:700; position:sticky; top:0;}
-    tr:hover td{background:#fbfffb;}
-    @media (max-width:760px){
-      th,td{padding:10px 6px; font-size:13px;}
-      table{min-width:600px;}
+    h1 { text-align: center; color: #333; margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background: #4CAF50; color: white; }
+    .logout-btn {
+      background: #f44336;
+      color: white;
+      padding: 8px 14px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      float: right;
+      margin-bottom: 20px;
     }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="card">
-      <header>
-        <h1>All Orders</h1>
-         <a href="view.html" style="float:right; margin-bottom:10px; text-decoration:none; color:#4CAF50; font-weight:bold;">➕ Add Orders</a>
-          <div style="text-align:center; margin-bottom:15px;">
-        <div id="status" class="status">Loading...</div>
-      </header>
-
-      <div class="table-wrap">
-        <table id="ordersTable" aria-live="polite">
-          <thead>
-            <tr>
-              <th>Timestamp</th>
-              <th>Order ID</th>
-              <th>Customer</th>
-              <th>Date</th>
-              <th>Items</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
+  <button class="logout-btn" onclick="logout()">Logout</button>
+  <h1>Orders</h1>
+  <table id="ordersTable">
+    <thead>
+      <tr>
+        <th>Order ID</th>
+        <th>Customer</th>
+        <th>Date</th>
+        <th>Items</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxUf4izbMFu9ulS19MpfQ_Q7p9-gmgMwLkEJ9UH_jSvTwEpXLBbopxh-rthiZFgwVGm/exec"; // replace with your /exec link
+    const role = localStorage.getItem("role");
+    if (!role) window.location.href = "login.html";
 
-    async function fetchOrders() {
-      const statusEl = document.getElementById('status');
-      const tbody = document.querySelector('#ordersTable tbody');
-      tbody.innerHTML = '';
-      statusEl.textContent = 'Fetching latest data...';
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxUf4izbMFu9ulS19MpfQ_Q7p9-gmgMwLkEJ9UH_jSvTwEpXLBbopxh-rthiZFgwVGm/exec";
+    const ordersTable = document.getElementById("ordersTable").querySelector("tbody");
 
-      try {
-        const res = await fetch(SCRIPT_URL);
-        if (!res.ok) throw new Error('Network response was not ok');
-        const data = await res.json();
+    async function loadOrders() {
+      const res = await fetch(SCRIPT_URL);
+      const data = await res.json();
+      ordersTable.innerHTML = "";
 
-        if (!Array.isArray(data) || data.length === 0) {
-          statusEl.textContent = 'No orders found yet.';
-          return;
-        }
-
-        // show newest first
-        data.reverse().forEach(order => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${order.Timestamp ?? ''}</td>
-            <td>${order["Order ID"] ?? ''}</td>
-            <td>${order.Customer ?? ''}</td>
-            <td>${order.Date ?? ''}</td>
-            <td>${order.Items ?? ''}</td>
-            <td>${order.Total ?? ''}</td>
-          `;
-          tbody.appendChild(tr);
-        });
-
-        statusEl.textContent = '✅ Data loaded successfully!';
-      } catch (err) {
-        console.error(err);
-        statusEl.textContent = '❌ Failed to fetch orders: ' + (err.message || '');
-      }
+      data.forEach(row => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${row.orderId}</td>
+          <td>${row.customer}</td>
+          <td>${row.date}</td>
+          <td>${row.items}</td>
+          <td>${row.total}</td>
+        `;
+        ordersTable.appendChild(tr);
+      });
     }
 
-    // initial load
-    fetchOrders();
+    function logout() {
+      localStorage.removeItem("role");
+      window.location.href = "login.html";
+    }
+
+    loadOrders();
   </script>
 </body>
 </html>
-
-
-
-
-
-
